@@ -21,6 +21,7 @@ public class Invoice {
 		BigDecimal sum = new BigDecimal(0);
 		for (Product product : this.products.keySet()) {
 			Integer quantity = this.products.get(product);
+			sum = sum.add(product.getPrice().multiply(new BigDecimal(quantity)));
 		}
 		return sum;
 	}
