@@ -27,10 +27,15 @@ public class Invoice {
 	}
 
 	public BigDecimal getTax() {
-		return new BigDecimal(0);
+		return this.getGrossPrice().subtract(this.getNetPrice());
 	}
 
 	public BigDecimal getGrossPrice() {
-		return new BigDecimal(0);
+		BigDecimal sum = new BigDecimal(0);
+		for (Product product : this.products.keySet()) {
+			Integer quantity = this.products.get(product);
+			sum = sum.add(product.getPriceWithTax().multiply(new BigDecimal(quantity)));
+		}
+		return sum;
 	}
 }
