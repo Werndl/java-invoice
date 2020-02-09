@@ -15,6 +15,10 @@ public class Invoice {
 
 	public void addProduct(Product product, Integer quantity) {
 		this.products.put(product, quantity);
+		int quantityValue = quantity.intValue();
+		if (quantityValue <= 0) {
+            throw new IllegalArgumentException("Quantity cannot be less than or equal to 0");
+        }
 	}
 
 	public BigDecimal getNetPrice() {
