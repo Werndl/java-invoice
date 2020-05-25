@@ -7,6 +7,9 @@ import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
+    private static int nextNumber = 0;
+    private final int number = ++nextNumber;
+
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -15,8 +18,23 @@ public class Invoice {
     public void addProduct(Product product, Integer quantity) {
         if (product == null || quantity <= 0) {
             throw new IllegalArgumentException();
+        } else if (products.isEmpty()) {
+            products.put(product, quantity);
+        } else {
+            boolean status = false;
+            for (Product existProduct : products.keySet()) {
+                String productName = product.getName();
+                String existProductName = existProduct.getName();
+                if (productName.equals(existProductName)) {
+                    status = true;
+                    int newProductQuantity = products.get(existProduct) + quantity;
+                    products.replace(existProduct, newProductQuantity);
+                }
+            }
+            if (!status) {
+                products.put(product, quantity);
+            }
         }
-        products.put(product, quantity);
     }
 
     public BigDecimal getNetTotal() {
@@ -39,5 +57,23 @@ public class Invoice {
             totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
         }
         return totalGross;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public String getInvoiceProductsList() {
+        StringBuilder productsListString = new StringBuilder();
+        productsListString.append("Numer faktury: ").append(getNumber()).append("\n");
+        for (Product product : products.keySet()) {
+            String productName = product.getName();
+            BigDecimal productPrice = product.getPrice();
+            productsListString.append(" | ").append(productName);
+            productsListString.append(" | ").append(products.get(product));
+            productsListString.append(" | ").append(productPrice).append(" | \n");
+        }
+        productsListString.append("Liczba pozycji: ").append(products.size());
+        return productsListString.toString();
     }
 }

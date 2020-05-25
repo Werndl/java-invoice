@@ -104,4 +104,91 @@ public class InvoiceTest {
     public void testInvoiceWithNegativeQuantity() {
         invoice.addProduct(new DairyProduct("Zsiadle mleko", new BigDecimal("5.55")), -1);
     }
+
+    @Test
+    public void testAddInvoiceNumber() {
+        int invoiceNumber = invoice.getNumber();
+        Assert.assertTrue(invoiceNumber > 0);
+    }
+
+    @Test
+    public void testInvoiceHasNumberGreaterThan0() {
+        int number = invoice.getNumber();
+        Assert.assertThat(number, Matchers.greaterThan(0));
+    }
+
+    @Test
+    public void testTwoInvoicesHaveDifferentNumbers() {
+        int number1 = new Invoice().getNumber();
+        int number2 = new Invoice().getNumber();
+        Assert.assertNotEquals(number1, number2);
+    }
+
+    @Test
+    public void testInvoiceDoesNotChangeItsNumber() {
+        Assert.assertEquals(invoice.getNumber(), invoice.getNumber());
+    }
+
+    @Test
+    public void testTheFirstInvoiceNumberIsLowerThanTheSecond() {
+        int number1 = new Invoice().getNumber();
+        int number2 = new Invoice().getNumber();
+        Assert.assertThat(number1, Matchers.lessThan(number2));
+    }
+
+    @Test
+    public void testListOfProductsAddedToInvoice(){
+        // 2x kubek - price: 10
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 2);
+        // 3x kozi serek - price: 30
+        invoice.addProduct(new DairyProduct("Kozi Serek", new BigDecimal("10")), 3);
+        // 1000x pinezka - price: 10
+        invoice.addProduct(new OtherProduct("Pinezka", new BigDecimal("0.01")), 1000);
+
+        String invoiceProductsList = invoice.getInvoiceProductsList();
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("| Kubek | 2 | 5 |"));
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("| Kozi Serek | 3 | 10 | "));
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("| Pinezka | 1000 | 0.01 | "));
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("Liczba pozycji: 3"));
+    }
+
+    @Test
+    public void testTwoTheSameProductShouldBeAsOnePositionOnInvoice(){
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 1);
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 1);
+
+        String invoiceProductsList = invoice.getInvoiceProductsList();
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("Liczba pozycji: 1"));
+    }
+
+    @Test
+    public void testTwoTheSameProductShouldHaveProperQuantityValue(){
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 7);
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 1);
+
+        String invoiceProductsList = invoice.getInvoiceProductsList();
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("| 8 |"));
+    }
+
+    @Test
+    public void testInvoiceShouldTwoTheSameProductAndOneDifferentShouldBeAsTwoPositionOnInvoice(){
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 1);
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 3);
+        invoice.addProduct(new TaxFreeProduct("Bułka", new BigDecimal("2")), 3);
+
+        String invoiceProductsList = invoice.getInvoiceProductsList();
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("Liczba pozycji: 2"));
+    }
+
+    @Test
+    public void testInvoiceShouldHaveTwoPositionForFourProducts(){
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 1);
+        invoice.addProduct(new TaxFreeProduct("Kubek", new BigDecimal("5")), 3);
+
+        invoice.addProduct(new TaxFreeProduct("Garnek", new BigDecimal("4")), 3);
+        invoice.addProduct(new TaxFreeProduct("Garnek", new BigDecimal("4")), 7);
+
+        String invoiceProductsList = invoice.getInvoiceProductsList();
+        Assert.assertThat(invoiceProductsList, Matchers.containsString("Liczba pozycji: 2"));
+    }
 }
